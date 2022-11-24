@@ -84,7 +84,7 @@ const run = async (
     release: release.data,
     assets: Object.fromEntries(await Promise.all(release.data.assets.map(async asset => [assetDefs[asset.name], {
       ...asset,
-      hash: hash && await computeHash(hash, asset.url),
+      hash: hash && await computeHash(hash, asset.browser_download_url),
     }])))
   });
 
