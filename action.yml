@@ -1,0 +1,60 @@
+name: Release to Registry
+description: Creates a release of package managers from template and pushes to another registry repository.
+runs:
+  using: 'node16'
+  main: 'dist/index.js'
+inputs:
+  tag:
+    description: 'Tag of the release to be parsed'
+    required: true
+    default: ${{ github.event.release.tag_name }}
+  owner:
+    description: 'Owner of the repository'
+    required: true
+    default: ${{ github.repository_owner }}
+  repo:
+    description: 'Name of the repository'
+    required: true
+    default: ${{ github.event.repository.name }}
+  path:
+    description: 'Path of the release file on the target repo'
+    required: true
+  assets:
+    description: 'Mapping between a key and name of the asset'
+    required: true
+    default: ''
+  message:
+    description: 'Commit message'
+    required: true
+    default: 'feat: Auto-generated release by release-to-registry-action'
+  template:
+    description: 'Path to the mustache template file'
+    required: true
+  token:
+    description: 'GitHub token'
+    required: true
+    default: ${{ github.token }}
+  hash:
+    description: 'Hash algorithm to compute for assets using'
+    required: false
+  targetOwner:
+    description: 'Owner of target registry repository. Fallbacks to `owner` input'
+    required: false
+  targetRepo:
+    description: 'Name of target registry repository. Fallbacks to `repo` input'
+    required: false
+  branch:
+    description: 'Branch on where commits will be placed. Defaults to the default branch'
+    required: false
+  author:
+    description: 'Author of the commits in `Forename Surname <foo@example.com>` format'
+    required: false
+  committer:
+    description: 'Committer of the commits in `Forename Surname <foo@example.com>` format'
+    required: false
+  prTitle:
+    description: 'Title of pull request to be created. Fallbacks to `message` input'
+    required: false
+  prBody:
+    description: 'Description of pull request to be created'
+    required: false

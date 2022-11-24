@@ -1,0 +1,25 @@
+{
+  "name": "@siketyan/release-to-registry-action",
+  "description": "Creates a release of package managers from template and pushes to another registry repository.",
+  "author": "Naoki Ikeguchi <me@s6n.jp>",
+  "license": "MIT",
+  "version": "0.1.0",
+  "main": "dist/index.js",
+  "scripts": {
+    "start": "node .",
+    "build": "esbuild ./src/main.ts --bundle --platform=node --external:./node_modules/* --outfile=./dist/index.js"
+  },
+  "dependencies": {
+    "@actions/core": "^1.10.0",
+    "@actions/github": "^5.1.1",
+    "mustache": "^4.2.0",
+    "node-fetch-commonjs": "^3.2.4",
+    "octokit": "^2.0.10"
+  },
+  "devDependencies": {
+    "@types/mustache": "^4.2.2",
+    "@types/node": "^18.11.9",
+    "esbuild": "^0.15.15",
+    "typescript": "^4.9.3"
+  }
+}

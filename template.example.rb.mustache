@@ -1,0 +1,35 @@
+class Example < Formula
+  desc "Example formula"
+  homepage "https://github.com/siketyan/release-to-registry-action"
+  version "{{tag_without_v}}"
+  license "MIT"
+
+  on_macos do
+    if Hardware::CPU.intel?
+      url "{{{assets.macos_x86_64.url}}}"
+      sha256 "{{assets.macos_x86_64.hash}}"
+    else
+      url "{{assets.macos_aarch64.url}}"
+      sha256 "{{assets.macos_aarch64.hash}}"
+    end
+
+    def install
+      bin.install "example"
+    end
+  end
+
+  on_linux do
+    if Hardware::CPU.intel? && Hardware::CPU.is_64_bit?
+      url "{{assets.linux_x86_64.url}}"
+      sha256 "{{assets.linux_x86_64.hash}}"
+
+      def install
+        bin.install "example"
+      end
+    end
+  end
+
+  test do
+    system "#{bin}/example", "-V"
+  end
+end
