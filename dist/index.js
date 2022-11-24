@@ -24732,9 +24732,10 @@ var parseAuthorOrCommitter = (str) => {
   if (match === null) {
     throw new Error(`Author or committer '${str}' does not match the format 'Forename Surname <foo@example.com>'.`);
   }
+  console.log("Match", match);
   return {
-    name: match["name"],
-    email: match["email"]
+    name: match.groups["name"],
+    email: match.groups["email"]
   };
 };
 var run = async ({ tag, owner, repo, path, assets, message, template, token, hash, targetOwner, targetRepo, branch, author, committer, prTitle, prBody }, octokit) => {
@@ -24763,15 +24764,29 @@ var run = async ({ tag, owner, repo, path, assets, message, template, token, has
   console.log("Rendered", rendered);
   owner = targetOwner ?? owner;
   repo = targetRepo ?? repo;
+  const authorInfo = parseAuthorOrCommitter(author);
+  const committerInfo = parseAuthorOrCommitter(committer);
+  let sha;
+  try {
+    const content = await octokit.rest.repos.getContent({
+      owner,
+      repo,
+      path
+    });
+    sha = content.data["sha"];
+  } catch {
+    console.log("The path does not exist, creating a new file");
+  }
   const commit = await octokit.rest.repos.createOrUpdateFileContents({
     owner,
     repo,
     path,
     branch,
-    author: parseAuthorOrCommitter(author),
-    committer: parseAuthorOrCommitter(committer),
+    author: authorInfo,
+    committer: committerInfo,
     message,
-    content: Buffer.from(rendered).toString("base64")
+    content: Buffer.from(rendered).toString("base64"),
+    sha
   });
   (0, import_core.setOutput)("commit", commit.data.commit.sha);
   if (branch === void 0) {

@@ -44,14 +44,16 @@ const parseAuthorOrCommitter = (str?: string): { name: string, email: string } |
     return undefined;
   }
 
-  const match = /^(.+) <(.+)>$/.exec(str);
+  const match = /^(?<name>.+) <(?<email>.+)>$/.exec(str);
   if (match === null) {
     throw new Error(`Author or committer '${str}' does not match the format 'Forename Surname <foo@example.com>'.`)
   }
 
+  console.log('Match', match);
+
   return {
-    name: match[1],
-    email: match[2],
+    name: match.groups['name'],
+    email: match.groups['email'],
   };
 };
 
@@ -91,15 +93,32 @@ const run = async (
   owner = targetOwner ?? owner;
   repo = targetRepo ?? repo;
 
+  const authorInfo = parseAuthorOrCommitter(author);
+  const committerInfo = parseAuthorOrCommitter(committer);
+
+  let sha: string | undefined
+  try {
+    const content = await octokit.rest.repos.getContent({
+      owner,
+      repo,
+      path,
+    });
+
+    sha = content.data['sha'];
+  } catch {
+    console.log('The path does not exist, creating a new file');
+  }
+
   const commit = await octokit.rest.repos.createOrUpdateFileContents({
     owner,
     repo,
     path,
     branch,
-    author: parseAuthorOrCommitter(author),
-    committer: parseAuthorOrCommitter(committer),
+    author: authorInfo,
+    committer: committerInfo,
     message,
     content: Buffer.from(rendered).toString('base64'),
+    sha,
   });
 
   setOutput('commit', commit.data.commit.sha);
