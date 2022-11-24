@@ -44,14 +44,14 @@ const parseAuthorOrCommitter = (str?: string): { name: string, email: string } |
     return undefined;
   }
 
-  const match = /^(?<name>.+) <(?<email>.+)>$/.exec(str);
+  const match = /^(.+) <(.+)>$/.exec(str);
   if (match === null) {
     throw new Error(`Author or committer '${str}' does not match the format 'Forename Surname <foo@example.com>'.`)
   }
 
   return {
-    name: match['name'],
-    email: match['email'],
+    name: match[1],
+    email: match[2],
   };
 };
 
