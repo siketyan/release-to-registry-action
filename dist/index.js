@@ -24766,6 +24766,31 @@ var run = async ({ tag, owner, repo, path, assets, message, template, token, has
   repo = targetRepo ?? repo;
   const authorInfo = parseAuthorOrCommitter(author);
   const committerInfo = parseAuthorOrCommitter(committer);
+  const repository = await octokit.rest.repos.get({
+    owner,
+    repo
+  });
+  try {
+    let branchInfo = await octokit.rest.repos.getBranch({
+      owner,
+      repo,
+      branch
+    });
+    console.log("Branch already exists", branchInfo.data);
+  } catch {
+    const defaultBranch = await octokit.rest.repos.getBranch({
+      owner,
+      repo,
+      branch: repository.data.default_branch
+    });
+    const ref = await octokit.rest.git.createRef({
+      owner,
+      repo,
+      ref: `refs/heads/${branch}`,
+      sha: defaultBranch.data.commit.sha
+    });
+    console.log("Created a branch", ref.data);
+  }
   let sha;
   try {
     const content = await octokit.rest.repos.getContent({
@@ -24793,13 +24818,9 @@ var run = async ({ tag, owner, repo, path, assets, message, template, token, has
     console.log("Default branch was specified, so no pull request was created.");
     return;
   }
-  const repository = await octokit.rest.repos.get({
-    owner,
-    repo
-  });
   const pullRequest = await octokit.rest.pulls.create({
-    owner: targetOwner,
-    repo: targetRepo,
+    owner,
+    repo,
     head: branch,
     base: repository.data.default_branch,
     title: prTitle ?? message,
