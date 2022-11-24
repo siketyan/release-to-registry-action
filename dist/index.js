@@ -24804,7 +24804,7 @@ var run = async ({ tag, owner, repo, path, assets, message, template, token, has
       message: (0, import_core.getInput)("message"),
       template: (0, import_core.getInput)("template"),
       token: (0, import_core.getInput)("token"),
-      hash: emptyAsUndefined("hash"),
+      hash: emptyAsUndefined((0, import_core.getInput)("hash")),
       targetOwner: emptyAsUndefined((0, import_core.getInput)("targetOwner")),
       targetRepo: emptyAsUndefined((0, import_core.getInput)("targetRepo")),
       branch: emptyAsUndefined((0, import_core.getInput)("branch")),

@@ -140,7 +140,7 @@ const run = async (
       message: getInput('message'),
       template: getInput('template'),
       token: getInput('token'),
-      hash: emptyAsUndefined('hash'),
+      hash: emptyAsUndefined(getInput('hash')),
       targetOwner: emptyAsUndefined(getInput('targetOwner')),
       targetRepo: emptyAsUndefined(getInput('targetRepo')),
       branch: emptyAsUndefined(getInput('branch')),
