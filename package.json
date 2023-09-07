@@ -12,14 +12,14 @@
   "dependencies": {
     "@actions/core": "^1.10.0",
     "@actions/github": "^5.1.1",
+    "@octokit/rest": "^20.0.1",
     "mustache": "^4.2.0",
-    "node-fetch-commonjs": "^3.2.4",
-    "octokit": "^2.0.10"
+    "node-fetch": "^3.3.2"
   },
   "devDependencies": {
     "@types/mustache": "^4.2.2",
     "@types/node": "^20.5.9",
-    "esbuild": "^0.15.15",
-    "typescript": "^4.9.3"
+    "esbuild": "^0.19.2",
+    "typescript": "^5.2.2"
   }
 }

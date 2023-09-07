@@ -1,9 +1,9 @@
 import { readFile } from 'fs/promises';
 
 import { getInput, getMultilineInput, setFailed, setOutput } from '@actions/core';
+import { Octokit } from '@octokit/rest';
 import { render } from 'mustache/mustache.js';
-import fetch from 'node-fetch-commonjs';
-import { Octokit } from 'octokit';
+import fetch from 'node-fetch';
 import { createHash } from 'crypto';
 
 type Input = {
@@ -196,6 +196,7 @@ const run = async (
 
     const octokit = new Octokit({
       auth: input.token,
+      request: fetch,
     });
 
     await run(input, octokit);
