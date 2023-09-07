@@ -1,7 +1,7 @@
 name: Release to Registry
 description: Creates a release of package managers from template and pushes to another registry repository.
 runs:
-  using: 'node16'
+  using: 'node20'
   main: 'dist/index.js'
 inputs:
   tag:

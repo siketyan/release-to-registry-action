@@ -20134,9 +20134,9 @@ var require_timespan = __commonJS({
   }
 });
 
-// node_modules/.pnpm/semver@5.7.1/node_modules/semver/semver.js
+// node_modules/.pnpm/semver@5.7.2/node_modules/semver/semver.js
 var require_semver = __commonJS({
-  "node_modules/.pnpm/semver@5.7.1/node_modules/semver/semver.js"(exports, module2) {
+  "node_modules/.pnpm/semver@5.7.2/node_modules/semver/semver.js"(exports, module2) {
     exports = module2.exports = SemVer;
     var debug;
     if (typeof process === "object" && process.env && process.env.NODE_DEBUG && /\bsemver\b/i.test(process.env.NODE_DEBUG)) {
@@ -20153,15 +20153,31 @@ var require_semver = __commonJS({
     var MAX_LENGTH = 256;
     var MAX_SAFE_INTEGER = Number.MAX_SAFE_INTEGER || 9007199254740991;
     var MAX_SAFE_COMPONENT_LENGTH = 16;
+    var MAX_SAFE_BUILD_LENGTH = MAX_LENGTH - 6;
     var re = exports.re = [];
+    var safeRe = exports.safeRe = [];
     var src = exports.src = [];
     var R = 0;
+    var LETTERDASHNUMBER = "[a-zA-Z0-9-]";
+    var safeRegexReplacements = [
+      ["\\s", 1],
+      ["\\d", MAX_LENGTH],
+      [LETTERDASHNUMBER, MAX_SAFE_BUILD_LENGTH]
+    ];
+    function makeSafeRe(value) {
+      for (var i2 = 0; i2 < safeRegexReplacements.length; i2++) {
+        var token = safeRegexReplacements[i2][0];
+        var max = safeRegexReplacements[i2][1];
+        value = value.split(token + "*").join(token + "{0," + max + "}").split(token + "+").join(token + "{1," + max + "}");
+      }
+      return value;
+    }
     var NUMERICIDENTIFIER = R++;
     src[NUMERICIDENTIFIER] = "0|[1-9]\\d*";
     var NUMERICIDENTIFIERLOOSE = R++;
-    src[NUMERICIDENTIFIERLOOSE] = "[0-9]+";
+    src[NUMERICIDENTIFIERLOOSE] = "\\d+";
     var NONNUMERICIDENTIFIER = R++;
-    src[NONNUMERICIDENTIFIER] = "\\d*[a-zA-Z-][a-zA-Z0-9-]*";
+    src[NONNUMERICIDENTIFIER] = "\\d*[a-zA-Z-]" + LETTERDASHNUMBER + "*";
     var MAINVERSION = R++;
     src[MAINVERSION] = "(" + src[NUMERICIDENTIFIER] + ")\\.(" + src[NUMERICIDENTIFIER] + ")\\.(" + src[NUMERICIDENTIFIER] + ")";
     var MAINVERSIONLOOSE = R++;
@@ -20175,7 +20191,7 @@ var require_semver = __commonJS({
     var PRERELEASELOOSE = R++;
     src[PRERELEASELOOSE] = "(?:-?(" + src[PRERELEASEIDENTIFIERLOOSE] + "(?:\\." + src[PRERELEASEIDENTIFIERLOOSE] + ")*))";
     var BUILDIDENTIFIER = R++;
-    src[BUILDIDENTIFIER] = "[0-9A-Za-z-]+";
+    src[BUILDIDENTIFIER] = LETTERDASHNUMBER + "+";
     var BUILD = R++;
     src[BUILD] = "(?:\\+(" + src[BUILDIDENTIFIER] + "(?:\\." + src[BUILDIDENTIFIER] + ")*))";
     var FULL = R++;
@@ -20205,6 +20221,7 @@ var require_semver = __commonJS({
     var TILDETRIM = R++;
     src[TILDETRIM] = "(\\s*)" + src[LONETILDE] + "\\s+";
     re[TILDETRIM] = new RegExp(src[TILDETRIM], "g");
+    safeRe[TILDETRIM] = new RegExp(makeSafeRe(src[TILDETRIM]), "g");
     var tildeTrimReplace = "$1~";
     var TILDE = R++;
     src[TILDE] = "^" + src[LONETILDE] + src[XRANGEPLAIN] + "$";
@@ -20215,6 +20232,7 @@ var require_semver = __commonJS({
     var CARETTRIM = R++;
     src[CARETTRIM] = "(\\s*)" + src[LONECARET] + "\\s+";
     re[CARETTRIM] = new RegExp(src[CARETTRIM], "g");
+    safeRe[CARETTRIM] = new RegExp(makeSafeRe(src[CARETTRIM]), "g");
     var caretTrimReplace = "$1^";
     var CARET = R++;
     src[CARET] = "^" + src[LONECARET] + src[XRANGEPLAIN] + "$";
@@ -20227,6 +20245,7 @@ var require_semver = __commonJS({
     var COMPARATORTRIM = R++;
     src[COMPARATORTRIM] = "(\\s*)" + src[GTLT] + "\\s*(" + LOOSEPLAIN + "|" + src[XRANGEPLAIN] + ")";
     re[COMPARATORTRIM] = new RegExp(src[COMPARATORTRIM], "g");
+    safeRe[COMPARATORTRIM] = new RegExp(makeSafeRe(src[COMPARATORTRIM]), "g");
     var comparatorTrimReplace = "$1$2$3";
     var HYPHENRANGE = R++;
     src[HYPHENRANGE] = "^\\s*(" + src[XRANGEPLAIN] + ")\\s+-\\s+(" + src[XRANGEPLAIN] + ")\\s*$";
@@ -20238,6 +20257,7 @@ var require_semver = __commonJS({
       debug(i, src[i]);
       if (!re[i]) {
         re[i] = new RegExp(src[i]);
+        safeRe[i] = new RegExp(makeSafeRe(src[i]));
       }
     }
     var i;
@@ -20258,7 +20278,7 @@ var require_semver = __commonJS({
       if (version.length > MAX_LENGTH) {
         return null;
       }
-      var r = options.loose ? re[LOOSE] : re[FULL];
+      var r = options.loose ? safeRe[LOOSE] : safeRe[FULL];
       if (!r.test(version)) {
         return null;
       }
@@ -20304,7 +20324,7 @@ var require_semver = __commonJS({
       debug("SemVer", version, options);
       this.options = options;
       this.loose = !!options.loose;
-      var m = version.trim().match(options.loose ? re[LOOSE] : re[FULL]);
+      var m = version.trim().match(options.loose ? safeRe[LOOSE] : safeRe[FULL]);
       if (!m) {
         throw new TypeError("Invalid Version: " + version);
       }
@@ -20628,6 +20648,7 @@ var require_semver = __commonJS({
       if (!(this instanceof Comparator)) {
         return new Comparator(comp, options);
       }
+      comp = comp.trim().split(/\s+/).join(" ");
       debug("comparator", comp, options);
       this.options = options;
       this.loose = !!options.loose;
@@ -20641,7 +20662,7 @@ var require_semver = __commonJS({
     }
     var ANY = {};
     Comparator.prototype.parse = function(comp) {
-      var r = this.options.loose ? re[COMPARATORLOOSE] : re[COMPARATOR];
+      var r = this.options.loose ? safeRe[COMPARATORLOOSE] : safeRe[COMPARATOR];
       var m = comp.match(r);
       if (!m) {
         throw new TypeError("Invalid comparator: " + comp);
@@ -20719,14 +20740,14 @@ var require_semver = __commonJS({
       this.options = options;
       this.loose = !!options.loose;
       this.includePrerelease = !!options.includePrerelease;
-      this.raw = range;
-      this.set = range.split(/\s*\|\|\s*/).map(function(range2) {
+      this.raw = range.trim().split(/\s+/).join(" ");
+      this.set = this.raw.split("||").map(function(range2) {
         return this.parseRange(range2.trim());
       }, this).filter(function(c) {
         return c.length;
       });
       if (!this.set.length) {
-        throw new TypeError("Invalid SemVer Range: " + range);
+        throw new TypeError("Invalid SemVer Range: " + this.raw);
       }
       this.format();
     }
@@ -20741,16 +20762,14 @@ var require_semver = __commonJS({
     };
     Range.prototype.parseRange = function(range) {
       var loose = this.options.loose;
-      range = range.trim();
-      var hr = loose ? re[HYPHENRANGELOOSE] : re[HYPHENRANGE];
+      var hr = loose ? safeRe[HYPHENRANGELOOSE] : safeRe[HYPHENRANGE];
       range = range.replace(hr, hyphenReplace);
       debug("hyphen replace", range);
-      range = range.replace(re[COMPARATORTRIM], comparatorTrimReplace);
-      debug("comparator trim", range, re[COMPARATORTRIM]);
-      range = range.replace(re[TILDETRIM], tildeTrimReplace);
-      range = range.replace(re[CARETTRIM], caretTrimReplace);
-      range = range.split(/\s+/).join(" ");
-      var compRe = loose ? re[COMPARATORLOOSE] : re[COMPARATOR];
+      range = range.replace(safeRe[COMPARATORTRIM], comparatorTrimReplace);
+      debug("comparator trim", range, safeRe[COMPARATORTRIM]);
+      range = range.replace(safeRe[TILDETRIM], tildeTrimReplace);
+      range = range.replace(safeRe[CARETTRIM], caretTrimReplace);
+      var compRe = loose ? safeRe[COMPARATORLOOSE] : safeRe[COMPARATOR];
       var set = range.split(" ").map(function(comp) {
         return parseComparator(comp, this.options);
       }, this).join(" ").split(/\s+/);
@@ -20807,7 +20826,7 @@ var require_semver = __commonJS({
       }).join(" ");
     }
     function replaceTilde(comp, options) {
-      var r = options.loose ? re[TILDELOOSE] : re[TILDE];
+      var r = options.loose ? safeRe[TILDELOOSE] : safeRe[TILDE];
       return comp.replace(r, function(_, M, m, p, pr) {
         debug("tilde", comp, _, M, m, p, pr);
         var ret;
@@ -20834,7 +20853,7 @@ var require_semver = __commonJS({
     }
     function replaceCaret(comp, options) {
       debug("caret", comp, options);
-      var r = options.loose ? re[CARETLOOSE] : re[CARET];
+      var r = options.loose ? safeRe[CARETLOOSE] : safeRe[CARET];
       return comp.replace(r, function(_, M, m, p, pr) {
         debug("caret", comp, _, M, m, p, pr);
         var ret;
@@ -20883,7 +20902,7 @@ var require_semver = __commonJS({
     }
     function replaceXRange(comp, options) {
       comp = comp.trim();
-      var r = options.loose ? re[XRANGELOOSE] : re[XRANGE];
+      var r = options.loose ? safeRe[XRANGELOOSE] : safeRe[XRANGE];
       return comp.replace(r, function(ret, gtlt, M, m, p, pr) {
         debug("xRange", comp, ret, gtlt, M, m, p, pr);
         var xM = isX(M);
@@ -20934,7 +20953,7 @@ var require_semver = __commonJS({
     }
     function replaceStars(comp, options) {
       debug("replaceStars", comp, options);
-      return comp.trim().replace(re[STAR], "");
+      return comp.trim().replace(safeRe[STAR], "");
     }
     function hyphenReplace($0, from, fM, fm, fp, fpr, fb, to, tM, tm, tp, tpr, tb) {
       if (isX(fM)) {
@@ -21174,7 +21193,7 @@ var require_semver = __commonJS({
       if (typeof version !== "string") {
         return null;
       }
-      var match = version.match(re[COERCE]);
+      var match = version.match(safeRe[COERCE]);
       if (match == null) {
         return null;
       }
